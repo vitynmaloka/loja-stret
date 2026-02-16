@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vityn Store - Moda Jovem</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
+
+<style>
+body { 
+    font-family: Arial, sans-serif;
+    background:#b0b0b0; 
+    margin:0; 
+}
+header { 
+    background:#111; 
+    color:#fff; 
+    padding:15px 30px; 
+    display:flex; 
+    justify-content:space-between; 
+    align-items:center; 
+    position:sticky; 
+    top:0; 
+    z-index: 100;
+}
+header h2 {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 32px;
+    color:#ff4081;
+    margin:0;
+}
+header a { color:#fff; margin-left:20px; text-decoration:none; }
+header a:hover { color:#ff4081; }
+
+#search-bar {
+    margin:10px 30px;
+    width:calc(100% - 60px);
+    padding:12px;
+    border-radius:12px;
+    border:none;
+    display:none; 
+}
+
+.tabs { display:flex; justify-content:center; margin-top:20px; gap:10px; }
+.tabs button {
+    padding:10px 20px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    background:#111;
+    color:white;
+    font-weight:bold;
+    transition:0.3s;
+}
+.tabs button.active { background:#25D366; }
+
+.container { display:flex; flex-wrap:wrap; justify-content:center; padding:20px; }
+
+.product { 
+    background:#fff; 
+    width:260px;
+    height:380px;
+    margin:15px; 
+    padding:15px; 
+    border-radius:15px; 
+    text-align:center; 
+    box-shadow:0 2px 4px rgba(0,0,0,0.1); 
+    transition:0.3s; 
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:center;
+}
+.product:hover { box-shadow:0 6px 12px rgba(0,0,0,0.2); }
+.product img {
+    max-width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius:12px;
+    margin-bottom:10px;
+}
+.product h3 { 
+    margin:5px 0; 
+    font-size: 18px; 
+    text-align:center;
+    flex-shrink:0;
+}
+.product p { 
+    margin:5px 0 10px 0; 
+    font-size: 16px; 
+    font-weight:bold;
+    flex-shrink:0;
+}
+
+button.size-btn { width:100%; padding:10px; margin-top:auto; border:none; border-radius:8px; cursor:pointer; background:#25D366; color:#fff; font-weight:bold; }
+
+.cart-icon, .search-icon {
+    position:fixed; 
+    top:150px; 
+    font-size:32px; 
+    cursor:pointer;
+}
+.cart-icon { right:30px; }
+.search-icon { right:80px; }
+
+.cart-count { position:absolute; top:-8px; right:-10px; background:#ff4081; color:white; font-size:14px; padding:4px 7px; border-radius:50%; }
+
+.cart-panel { position:fixed; top:0; right:-400px; width:350px; height:100%; background:#fff; box-shadow:-5px 0 15px rgba(0,0,0,0.3); transition:0.3s; padding:25px; overflow-y:auto; }
+.cart-panel.show { right:0; }
+.cart-header { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:15px; }
+.cart-header span { cursor:pointer; font-size:24px; color:red; }
+.cart-item { border-bottom:1px solid #ddd; padding:10px 0; display:flex; align-items:center; gap:10px; }
+.cart-item img { width:50px; border-radius:6px; }
+.quantity-controls button { width:30px; margin:0 3px; background:#111; color:#fff; border:none; border-radius:6px; cursor:pointer;}
+.remove-btn { background:red; color:white; border:none; padding:5px; border-radius:6px; cursor:pointer;}
+.total { font-weight:bold; margin-top:15px; }
+.finalizar-btn { background:#25D366; color:#fff; border:none; padding:12px; width:100%; margin-top:15px; border-radius:10px; cursor:pointer; }
+
+#size-picker-panel {
+  display:none;
+  position: fixed;
+  bottom: 30px;
+  left: 30px;
+  width: 320px;
+  background: white;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  border-radius: 15px;
+  padding: 15px;
+  z-index: 1000;
+}
+#size-picker-panel img { width: 100%; border-radius: 12px; margin-bottom: 12px; }
+#size-picker-panel h3 { margin: 0 0 10px 0; font-size: 22px; text-align: center; }
+
+.size-options { display: flex; justify-content: center; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
+.size-options div { width: 50px; padding: 12px 0; background: #ddd; border-radius: 12px; text-align: center; font-weight: bold; font-size: 18px; cursor: pointer; user-select: none; transition: background-color 0.3s; }
+.size-options div.selected { background: #25D366; color: white; }
+.size-options div.disabled { background: #bbb; color: #666; cursor: not-allowed; }
+
+#size-picker-panel button {
+  width: 48%; padding: 12px; margin: 0 1% 0 1%; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; transition: background-color 0.3s;
+}
+#size-picker-panel .cart-btn { background: #111; color: white; }
+#size-picker-panel .buy-btn { background: #25D366; color: white; }
+#size-picker-panel .close-btn { background: #e53935; color: white; margin-top: 10px; width: 100%; }
+</style>
+</head>
+<body>
+
+<header>
+    <h2>Vityn Store</h2>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="sobre.html">Sobre</a>
+    </nav>
+</header>
+
+<input type="text" id="search-bar" placeholder="Pesquisar produto...">
+
+<div class="search-icon" onclick="toggleSearch()">🔍</div>
+<div class="cart-icon" onclick="toggleCart()">🛒<span class="cart-count" id="cart-count">0</span></div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('camisas')">Camisas</button>
+  <button class="tab-btn" onclick="showTab('calcas')">Calças</button>
+  <button class="tab-btn" onclick="showTab('tenis')">Tênis</button>
+</div>
+
+<div class="cart-panel" id="cart-panel">
+    <div class="cart-header">
+        <h2>Seu Carrinho</h2>
+        <span onclick="toggleCart()">❌</span>
+    </div>
+    <div id="cart-items"></div>
+    <div class="total" id="total">Total: R$ 0.00</div>
+    <button class="finalizar-btn" onclick="window.location.href='checkout.html'">Finalizar Compra</button>
+    <button class="finalizar-btn" style="background:red; margin-top:10px;" onclick="toggleCart()">Fechar Carrinho</button>
+</div>
+
+<div id="size-picker-panel">
+    <h3 id="picker-name"></h3>
+    <img id="picker-img" src="" alt="Produto" />
+    <div class="size-options" id="picker-sizes"></div>
+    <div style="display:flex; justify-content:center; gap:10px;">
+      <button class="cart-btn" onclick="addToCartFromPicker()">Adicionar ao Carrinho</button>
+      <button class="buy-btn" onclick="buyNowFromPicker()">Comprar Agora</button>
+    </div>
+    <button class="close-btn" onclick="closeSizePicker()">Fechar</button>
+</div>
+
+<div class="container" id="products"></div>
+
+<script>
+const products = [
+    { name:"Calça Cargo Preta", price:179.90, img:"https://imageswscdn.wslojas.com.br/files/22496/produto-calca-cargo-reta-stranger-pretacostura-branca-7563.jpg", availableSizes:["P","M","G"], category:"calcas" },
+    { name:"Camisa Boxy", price:99.90, img:"https://img.ltwebstatic.com/v4/p/spmp/2026/01/30/e2/1769707889e217f6811dcd1af7c235b013146b5b29_thumbnail_405x.webp", availableSizes:["P","M"], category:"camisas" },
+    { name:"Nike Air Max 90", price:499.90, img:"https://m.media-amazon.com/images/I/61XRPdzulGL._AC_SY695_.jpg", availableSizes:["39","40","41"], category:"tenis" },
+    { name:"Nike TN Black", price:599.90, img:"https://www.gzstoretns.com.br/cdn/shop/files/logo_gz_38.png?v=1764946343&width=1200", availableSizes:["39","40","41"], category:"tenis" },
+    { name:"Nike Revolution", price:399.90, img:"https://m.media-amazon.com/images/I/71TE3V67XBL._AC_SY575_.jpg", availableSizes:["39","40","41"], category:"tenis" }
+];
+
+let cart = JSON.parse(localStorage.getItem("cart")) || {};
+let selectedIndex = null;
+let selectedSize = null;
+let currentTab = 'camisas';
+
+function renderProducts(filter = "") {
+    const container = document.getElementById("products");
+    container.innerHTML = "";
+
+    products.forEach((p, index) => {
+        // Mostrar produtos de todas as categorias se houver pesquisa
+        if (filter && !p.name.toLowerCase().includes(filter.toLowerCase())) return;
+
+        // Se não houver filtro, mostra apenas a aba atual
+        if (!filter && p.category !== currentTab) return;
+
+        container.innerHTML += `
+        <div class="product">
+            <img src="${p.img}" alt="${p.name}">
+            <h3>${p.name}</h3>
+            <p>R$ ${p.price.toFixed(2)}</p>
+            <button class="size-btn" onclick="openSizePicker(${index})">Escolher Tamanho</button>
+        </div>
+        `;
+    });
+}
+
+function showTab(tab){
+    currentTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(btn=>btn.classList.remove('active'));
+    document.querySelector('.tab-btn[onclick="showTab(\''+tab+'\')"]').classList.add('active');
+    renderProducts();
+}
+
+function openSizePicker(index){
+    selectedIndex = index;
+    selectedSize = null;
+    const product = products[index];
+    document.getElementById("picker-name").innerText = product.name;
+    document.getElementById("picker-img").src = product.img;
+
+    const sizeOptionsDiv = document.getElementById("picker-sizes");
+    sizeOptionsDiv.innerHTML = "";
+
+    let allSizes = [];
+    if(product.category === "tenis") allSizes = ["39","40","41"];
+    else allSizes = ["P","M","G"];
+
+    allSizes.forEach(s => {
+        const div = document.createElement("div");
+        div.innerText = s;
+        if(product.availableSizes.includes(s)){
+            div.classList.remove("disabled");
+            div.onclick = () => {
+                selectedSize = s;
+                Array.from(sizeOptionsDiv.children).forEach(c => c.classList.remove("selected"));
+                div.classList.add("selected");
+            };
+        } else div.classList.add("disabled");
+        sizeOptionsDiv.appendChild(div);
+    });
+
+    document.getElementById("size-picker-panel").style.display = "block";
+}
+
+function closeSizePicker(){ 
+    document.getElementById("size-picker-panel").style.display = "none"; 
+    selectedIndex = null; 
+    selectedSize = null; 
+}
+
+function addToCartFromPicker(){
+    if(!selectedSize) { alert("Selecione um tamanho!"); return; }
+    const product = products[selectedIndex];
+    const key = product.name + "-" + selectedSize;
+    if(cart[key]) cart[key].quantity++;
+    else cart[key] = {name: product.name, price: product.price, size: selectedSize, quantity: 1, img: product.img};
+    saveCart(); renderCart(); closeSizePicker();
+}
+
+function buyNowFromPicker(){ addToCartFromPicker(); window.location.href = "checkout.html"; }
+
+function saveCart(){ localStorage.setItem("cart", JSON.stringify(cart)); }
+
+function renderCart(){
+    const cartDiv = document.getElementById("cart-items");
+    cartDiv.innerHTML = "";
+    let total = 0;
+    for(let key in cart){
+        const item = cart[key];
+        total += item.price * item.quantity;
+        cartDiv.innerHTML += `
+        <div class="cart-item">
+            <img src="${item.img}" alt="${item.name}" />
+            <div>
+                <strong>${item.name}</strong> (${item.size})<br>
+                R$ ${item.price.toFixed(2)} x ${item.quantity}
+                <div class="quantity-controls">
+                    <button onclick="decrease('${key}')">-</button>
+                    <button onclick="increase('${key}')">+</button>
+                    <button class="remove-btn" onclick="removeItem('${key}')">X</button>
+                </div>
+            </div>
+        </div>
+        `;
+    }
+    document.getElementById("total").innerText = "Total: R$ " + total.toFixed(2);
+    atualizarContador();
+}
+
+function increase(key){ cart[key].quantity++; saveCart(); renderCart(); }
+function decrease(key){ if(cart[key].quantity>1) cart[key].quantity--; else delete cart[key]; saveCart(); renderCart(); }
+function removeItem(key){ delete cart[key]; saveCart(); renderCart(); }
+function toggleCart(){ document.getElementById("cart-panel").classList.toggle("show"); }
+function atualizarContador(){ let count=0; for(let key in cart) count+=cart[key].quantity; document.getElementById("cart-count").innerText=count; }
+
+function toggleSearch(){
+    const bar = document.getElementById("search-bar");
+    if(bar.style.display === "block") bar.style.display = "none";
+    else { 
+        bar.style.display = "block"; 
+        bar.focus(); 
+        renderProducts(); // mostra todos os produtos ao abrir pesquisa
+    }
+}
+
+// Filtragem em tempo real
+document.getElementById("search-bar").addEventListener("input", function() {
+    renderProducts(this.value.trim());
+});
+
+window.onload = function(){ renderProducts(); renderCart(); }
+</script>
+</body>
+</html>
